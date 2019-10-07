@@ -29,7 +29,7 @@ class board:
         """
         if pos >= 16 or pos < 0:
             return -1
-        if tile != 1 and tile != 2:
+        if tile != 1 and tile != 2 and tile != 3:
             return -1
         self.state[pos] = tile
         return 0
@@ -49,6 +49,35 @@ class board:
             return self.slide_left()
         return -1
     
+    
+    def slide_left(self):
+        move, score, merge_num = [], 0, 0
+        for row in [self.state[r:r+4] for r in range(0, 16, 4)]:
+            buf = row
+            for i in range(4):
+                if buf[i] == 0:
+                    continue
+                if i > 0 and buf[i-1] == 0:
+                    buf[i-1] = buf[i]
+                    buf[i] = 0
+                elif i < 3 and (buf[i] == buf[i+1] and buf[i] not in [1, 2]):
+                    buf[i] = buf[i] + 1
+                    buf[i+1] = 0
+                    score = score + 1 << (2*(buf[i]-3))
+                    merge_num = merge_num + 1
+                elif i < 3 and ((buf[i] == 1 and buf[i+1] == 2) or (buf[i] == 2 and buf[i+1] == 1)):
+                    buf[i] = 3
+                    buf[i+1] = 0
+                    score = score + 1
+                    merge_num = merge_num + 1
+            move += buf
+        score += 1 << merge_num
+        if move != self.state:
+            self.state = move
+            return score
+        self.state = move
+        return -1
+    '''   
     def slide_left(self):
         move, score = [], 0
         for row in [self.state[r:r + 4] for r in range(0, 16, 4)]:
@@ -65,7 +94,8 @@ class board:
             self.state = move
             return score
         return -1
-    
+    '''
+
     def slide_right(self):
         self.reflect_horizontal()
         score = self.slide_left()

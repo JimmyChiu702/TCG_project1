@@ -30,7 +30,7 @@ class agent:
     def close_episode(self, flag = ""):
         return
     
-    def take_action(self, state):
+    def take_action(self, state, last_event):
         return action()
     
     def check_for_win(self, state):
@@ -85,17 +85,36 @@ class rndenv(random_agent):
     
     def __init__(self, options = ""):
         super().__init__("name=random role=environment " + options)
+        self.init_tile_bag()
         return
+
+    def open_episode(self, flag = ""):
+        self.init_tile_bag()
     
-    def take_action(self, state):
-        empty = [pos for pos, tile in enumerate(state.state) if not tile]
+    def take_action(self, state, last_event):
+        if last_event == 0:
+            empty = [pos for pos, tile in [(i, state.state[i]) for i in [12, 13, 14, 15]] if not tile]
+        elif last_event == 1:
+            empty = [pos for pos, tile in [(i, state.state[i]) for i in [0, 4, 8, 12]] if not tile]
+        elif last_event == 2:
+            empty = [pos for pos, tile in [(i, state.state[i]) for i in [0, 1, 2, 3]] if not tile]
+        elif last_event == 3:
+            empty = [pos for pos, tile in [(i, state.state[i]) for i in [3, 7, 11, 15]] if not tile]
+        else:
+            empty = [pos for pos, tile in enumerate(state.state) if not tile]
         if empty:
             pos = self.choice(empty)
-            tile = self.choice([1] * 9 + [2])
+            if len(self.tile_bag) == 0:
+                self.init_tile_bag()
+            tile = self.choice(self.tile_bag)
+            self.tile_bag.remove(tile)
             return action.place(pos, tile)
         else:
             return action()
     
+    def init_tile_bag(self):
+        self.tile_bag = [1, 2, 3]
+
     
 class player(random_agent):
     """
@@ -107,11 +126,12 @@ class player(random_agent):
         super().__init__("name=dummy role=player " + options)
         return
     
-    def take_action(self, state):
-        legal = [op for op in range(4) if board(state).slide(op) != -1]
-        if legal:
-            op = self.choice(legal)
-            return action.slide(op)
+    def take_action(self, state, last_event):
+        scores = [board(state).slide(op) for op in range(4)]
+        max_value = max(scores)
+        if max_value != -1:
+            max_index = scores.index(max_value)            
+            return action.slide(max_index)
         else:
             return action()
     

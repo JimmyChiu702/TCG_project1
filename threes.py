@@ -60,9 +60,11 @@ if __name__ == '__main__':
         
         stat.open_episode(play.name() + ":" + evil.name())
         game = stat.back()
+        last_event = None
         while True:
             who = game.take_turns(play, evil)
-            move = who.take_action(game.state())
+            move = who.take_action(game.state(), last_event)
+            last_event = move.event()
             if not game.apply_action(move) or who.check_for_win(game.state()):
                 break
         win = game.last_turns(play, evil)
