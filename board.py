@@ -13,6 +13,7 @@ class board:
     
     def __init__(self, state = None):
         self.state = state[:] if state is not None else [0] * 16
+        self.last_move = -1
         return
     
     def __getitem__(self, pos):

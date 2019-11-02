@@ -30,7 +30,7 @@ class agent:
     def close_episode(self, flag = ""):
         return
     
-    def take_action(self, state, last_event):
+    def take_action(self, state):
         return action()
     
     def check_for_win(self, state):
@@ -91,14 +91,14 @@ class rndenv(random_agent):
     def open_episode(self, flag = ""):
         self.init_tile_bag()
     
-    def take_action(self, state, last_event):
-        if last_event == 0:
+    def take_action(self, state):
+        if state.last_move == 0:
             empty = [pos for pos, tile in [(i, state.state[i]) for i in [12, 13, 14, 15]] if not tile]
-        elif last_event == 1:
+        elif state.last_move == 1:
             empty = [pos for pos, tile in [(i, state.state[i]) for i in [0, 4, 8, 12]] if not tile]
-        elif last_event == 2:
+        elif state.last_move == 2:
             empty = [pos for pos, tile in [(i, state.state[i]) for i in [0, 1, 2, 3]] if not tile]
-        elif last_event == 3:
+        elif state.last_move == 3:
             empty = [pos for pos, tile in [(i, state.state[i]) for i in [3, 7, 11, 15]] if not tile]
         else:
             empty = [pos for pos, tile in enumerate(state.state) if not tile]
@@ -126,7 +126,7 @@ class player(random_agent):
         super().__init__("name=dummy role=player " + options)
         return
     
-    def take_action(self, state, last_event):
+    def take_action(self, state):
         scores = [board(state).slide(op) for op in range(4)]
         max_value = max(scores)
         if max_value != -1:
